@@ -1,8 +1,7 @@
-// Use environment variable if set, otherwise use the ngrok URL for production or localhost for development
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
-  (import.meta.env.PROD 
-    ? 'https://7431c3d434ad.ngrok-free.app/api'  // Your ngrok URL
-    : 'http://localhost:5000/api');
+// Use ngrok URL for production, localhost for development
+const API_BASE_URL = window.location.hostname === 'budget-tracker-qjbk.vercel.app'
+  ? 'https://7431c3d434ad.ngrok-free.app/api'
+  : 'http://localhost:5000/api';
 
 
 interface ApiResponse<T = any> {
