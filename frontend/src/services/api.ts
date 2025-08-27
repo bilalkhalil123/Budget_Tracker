@@ -2,8 +2,8 @@ import axios from 'axios';
 
 // API configuration
 const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.startsWith('127.0.0.1');
-const API_BASE_URL = isProduction 
-  ? 'https://34334c504147.ngrok-free.app/api'  // Your ngrok URL
+const API_BASE_URL = isProduction
+  ? 'https://1a68cf94e3d5.ngrok-free.app/api'  // Your ngrok URL
   : 'http://localhost:5000/api';
 
 // Create axios instance with default config
@@ -113,7 +113,7 @@ class ApiService {
         const evt = new CustomEvent('userUpdated', { detail: user });
         window.dispatchEvent(evt);
       }
-    } catch {}
+    } catch { }
   }
 
   async updateProfile(payload: {
@@ -161,7 +161,7 @@ class ApiService {
   async login(loginData: LoginData): Promise<ApiResponse> {
     try {
       const response = await axiosInstance.post('/auth/login', loginData);
-      
+
       if (response.data.success && response.data.token) {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
@@ -178,7 +178,7 @@ class ApiService {
   async signup(signupData: SignupData): Promise<ApiResponse> {
     try {
       const response = await axiosInstance.post('/auth/register', signupData);
-      
+
       if (response.data.success && response.data.token) {
         localStorage.setItem('token', response.data.token);
         localStorage.setItem('user', JSON.stringify(response.data.user));
@@ -245,16 +245,16 @@ class ApiService {
     sortOrder?: 'asc' | 'desc';
     category?: string;
     dateFrom?: string; // YYYY-MM-DD
-    dateTo?: string;   
+    dateTo?: string;
   }): Promise<ApiResponse<Expense[]>> {
     try {
       const query = params
-        ? '?' + new URLSearchParams( 
-              Object.entries(params).reduce((acc: Record<string, string>, [k, v]) => {
-              if (v !== undefined && v !== null && v !== '') acc[k] = String(v);
-              return acc;
-            }, {})
-          ).toString()
+        ? '?' + new URLSearchParams(
+          Object.entries(params).reduce((acc: Record<string, string>, [k, v]) => {
+            if (v !== undefined && v !== null && v !== '') acc[k] = String(v);
+            return acc;
+          }, {})
+        ).toString()
         : '';
 
       const response = await axiosInstance.get(`/expenses${query}`);
