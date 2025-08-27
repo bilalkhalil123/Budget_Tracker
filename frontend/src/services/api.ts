@@ -9,12 +9,12 @@ const API_BASE_URL = isProduction
 // Create axios instance with default config
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
-  withCredentials: true,
+  // We use Authorization header (JWT). Do not send credentials/cookies.
+  withCredentials: false,
   headers: {
     'Content-Type': 'application/json',
     'Accept': 'application/json',
-    'ngrok-skip-browser-warning': 'true',
-    'Access-Control-Allow-Credentials': 'true'
+    'ngrok-skip-browser-warning': 'true'
   }
 });
 

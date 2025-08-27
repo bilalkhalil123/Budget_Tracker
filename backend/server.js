@@ -12,43 +12,28 @@ const PORT = process.env.PORT || 5000;
 // Connect to MongoDB
 connectDB();
 
-// CORS configuration
+// CORS configuration (only the two Vercel domains and localhost for dev)
 const allowedOrigins = [
+  'https://budget-tracker-hturltgpn-bk418095-gmailcoms-projects.vercel.app',
   'https://budget-tracker-kappa-cyan.vercel.app',
-  'https://budget-tracker-ogjddxt0u-bk418095-gmailcoms-projects.vercel.app',
   'http://localhost:3000',
-  'http://127.0.0.1:3000',
-  'https://budget-tracker-qjbk.vercel.app',
-  'https://budget-tracker-ogjddxt0u-bk418095-gmailcom.vercel.app',
-  'https://c5757bfab4d7.ngrok-free.app',
-  'https://budget-tracker-ogjddxt0u-bk418095-gmailcoms-projects.vercel.app',
-  'http://localhost:5173', // Add Vite dev server
-  'http://127.0.0.1:5173'  // Add Vite dev server
+  'http://127.0.0.1:3000'
 ];
 
-// Enable CORS pre-flight
-app.options('*', (req, res) => {
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    return res.status(200).end();
-  }
-  return res.status(403).end();
-});
+const corsOptions = {
+  origin: (origin, callback) => {
+    if (!origin) return callback(null, true); // allow non-browser clients
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    return callback(new Error('Not allowed by CORS'));
+  },
+  credentials: false, // using Authorization header, not cookies
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  optionsSuccessStatus: 204
+};
 
-// Regular CORS middleware
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (allowedOrigins.includes(origin)) {
-    res.setHeader('Access-Control-Allow-Origin', origin);
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
-  }
-  next();
-});
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
