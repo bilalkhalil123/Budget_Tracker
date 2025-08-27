@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // API configuration
-const isProduction = process.env.NODE_ENV === 'production';
+const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.startsWith('127.0.0.1');
 const API_BASE_URL = isProduction 
   ? 'https://c5757bfab4d7.ngrok-free.app/api'  // Your ngrok URL
   : 'http://localhost:5000/api';
@@ -12,12 +12,22 @@ const axiosInstance = axios.create({
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
-    'ngrok-skip-browser-warning': 'true',
-    'Access-Control-Allow-Origin': isProduction 
-      ? 'https://budget-tracker-kappa-cyan.vercel.app' 
-      : 'http://localhost:3000'
+    'ngrok-skip-browser-warning': 'true'
   }
 });
+
+// Add a response interceptor
+axiosInstance.interceptors.response.use(
+  response => response,
+  error => {
+    if (error.response?.status === 401) {
+      // Handle unauthorized
+      localStorage.removeItem('token');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
 
 interface ApiResponse<T = any> {
