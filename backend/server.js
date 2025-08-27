@@ -12,21 +12,20 @@ const PORT = process.env.PORT || 5000;
 // Connect to MongoDB
 connectDB();
 
-// CORS
+// CORS configuration
 const allowedOrigins = [
-  /^https?:\/\/budget-tracker-.*-bk418095-gmailcoms-projects\.vercel\.app$/,  // Preview deployments
-  /^https?:\/\/budget-tracker-kappa-cyan\.vercel\.app$/,  // Production deployment
-  /^https?:\/\/localhost:[0-9]+$/,  // Local development
-  /^https?:\/\/127\.0\.0\.1:[0-9]+$/  // Local development
+  'https://budget-tracker-kappa-cyan.vercel.app',
+  'https://budget-tracker-ogjddxt0u-bk418095-gmailcoms-projects.vercel.app',
+  'http://localhost:3000',
+  'http://127.0.0.1:3000'
 ];
 
 app.use(cors({
-  origin: (origin, callback) => {
+  origin: function (origin, callback) {
     // Allow requests with no origin (like mobile apps or curl requests)
     if (!origin) return callback(null, true);
     
-    // Check if the origin matches any of the allowed patterns
-    if (allowedOrigins.some(regex => regex.test(origin))) {
+    if (allowedOrigins.includes(origin)) {
       return callback(null, true);
     }
     
@@ -37,6 +36,9 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
+// Handle preflight requests
+app.options('*', cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

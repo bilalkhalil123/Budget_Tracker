@@ -1,8 +1,23 @@
-// Use ngrok URL for production, localhost for development
-const isProduction = window.location.hostname.includes('vercel.app');
+import axios from 'axios';
+
+// API configuration
+const isProduction = process.env.NODE_ENV === 'production';
 const API_BASE_URL = isProduction 
-  ? 'https://c5757bfab4d7.ngrok-free.app/api'  // New ngrok URL
+  ? 'https://c5757bfab4d7.ngrok-free.app/api'  // Your ngrok URL
   : 'http://localhost:5000/api';
+
+// Configure axios defaults
+const axiosInstance = axios.create({
+  baseURL: API_BASE_URL,
+  withCredentials: true,
+  headers: {
+    'Content-Type': 'application/json',
+    'ngrok-skip-browser-warning': 'true',
+    'Access-Control-Allow-Origin': isProduction 
+      ? 'https://budget-tracker-kappa-cyan.vercel.app' 
+      : 'http://localhost:3000'
+  }
+});
 
 
 interface ApiResponse<T = any> {
