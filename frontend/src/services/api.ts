@@ -192,8 +192,9 @@ class ApiService {
     }
   }
 
-  async forgotPassword(email: string): Promise<ApiResponse> {
+  async forgotPassword(emailInput: string | { email: string }): Promise<ApiResponse> {
     try {
+      const email = typeof emailInput === 'string' ? emailInput : emailInput?.email;
       const response = await axiosInstance.post('/auth/forgot-password', { email });
       return response.data;
     } catch (error) {
