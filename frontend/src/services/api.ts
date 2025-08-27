@@ -1,4 +1,8 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://7431c3d434ad.ngrok-free.app/api';
+// Use environment variable if set, otherwise use the ngrok URL for production or localhost for development
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 
+  (import.meta.env.PROD 
+    ? 'https://7431c3d434ad.ngrok-free.app/api'  // Your ngrok URL
+    : 'http://localhost:5000/api');
 
 
 interface ApiResponse<T = any> {
