@@ -19,7 +19,6 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Environment files (do NOT commit secrets)
 .env
 *.env
 .env.*

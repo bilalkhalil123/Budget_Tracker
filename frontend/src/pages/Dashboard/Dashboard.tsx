@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Layout, Menu, Button, Avatar, Dropdown } from 'antd';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { 
-  BarChartOutlined, 
-  DollarOutlined, 
-  LogoutOutlined, 
-  MenuFoldOutlined, 
+import {
+  BarChartOutlined,
+  DollarOutlined,
+  LogoutOutlined,
+  MenuFoldOutlined,
   MenuUnfoldOutlined,
   UserOutlined,
   BellOutlined
@@ -35,8 +35,10 @@ const Dashboard: React.FC = () => {
           localStorage.setItem('user', JSON.stringify(res.user));// (key,value)
           setUser(res.user);
         }
-      } catch {}
+      } catch { }
     })();
+
+
 
     return () => {
       if (typeof window !== 'undefined') {
@@ -82,10 +84,10 @@ const Dashboard: React.FC = () => {
   ];
 
   const getSelectedKey = () => {
-    const path = location.pathname;
+    const path = location.pathname; // path part of URL
     if (path.includes('/analysis')) return '/dashboard/analysis';
     if (path.includes('/expenses')) return '/dashboard/expenses';
-    return '/dashboard/expenses'; 
+    return '/dashboard/expenses';
   };
 
   const getCurrentPageName = () => {
@@ -103,7 +105,7 @@ const Dashboard: React.FC = () => {
           <img src={logo} alt="Budget Tracker Logo" className="sidebar-logo" />
           {!collapsed && <h1 className="sidebar-title">Budget Tracker</h1>}
         </header>
-        
+
         <nav aria-label="Dashboard navigation">
           <Menu
             theme={'light'}
@@ -115,7 +117,7 @@ const Dashboard: React.FC = () => {
           />
         </nav>
       </aside>
-      
+
       <div className="dashboard-main">
         <header className="dashboard-header" role="banner">
           <div className="header-left">
@@ -130,15 +132,15 @@ const Dashboard: React.FC = () => {
             </button>
             <h2 className="page-title">{getCurrentPageName()}</h2>
           </div>
-          
+
           <div className="header-right" role="toolbar" aria-label="User actions">
-            <Button 
-              type="text" 
-              icon={<BellOutlined />} 
+            <Button
+              type="text"
+              icon={<BellOutlined />}
               className="notification-btn"
               aria-label="Notifications"
             />
-            <Dropdown 
+            <Dropdown
               menu={{ items: userMenuItems }}
               placement="bottomRight"
               trigger={['click']}
@@ -150,7 +152,7 @@ const Dashboard: React.FC = () => {
             </Dropdown>
           </div>
         </header>
-        
+
         <main className="dashboard-content" role="main" aria-label="Dashboard content">
           <Outlet />
         </main>

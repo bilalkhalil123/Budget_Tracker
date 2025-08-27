@@ -10,6 +10,15 @@ import Expenses from './pages/Dashboard/Expenses';
 import Profile from './pages/Dashboard/Profile';
 import MyAccount from './pages/Dashboard/MyAccount';
 import { App as AntdApp } from 'antd';
+import ApiService from './services/api';
+
+const ProtectedRoute: React.FC<{ children: JSX.Element }> = ({ children }) => {
+  return ApiService.isAuthenticated() ? children : <Navigate to="/login" replace />;
+};
+
+const PublicRoute: React.FC<{ children: JSX.Element }> = ({ children }) => {
+  return ApiService.isAuthenticated() ? <Navigate to="/dashboard" replace /> : children;
+};
 
 function App() {
   return (
@@ -17,17 +26,17 @@ function App() {
       <AntdApp>
         <Router>
           <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/signup" element={<SignupPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-            <Route path="/dashboard" element={<Dashboard />}>
+            <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+            <Route path="/signup" element={<PublicRoute><SignupPage /></PublicRoute>} />
+            <Route path="/forgot-password" element={<PublicRoute><ForgotPasswordPage /></PublicRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>}>
               <Route index element={<Navigate to="/dashboard/expenses" replace />} />
               <Route path="analysis" element={<Analysis />} />
               <Route path="expenses" element={<Expenses />} />
             </Route>
             {/* Standalone pages without dashboard sider */}
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/my-account" element={<MyAccount />} />
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+            <Route path="/my-account" element={<ProtectedRoute><MyAccount /></ProtectedRoute>} />
             <Route path="/" element={<Navigate to="/login" replace />} />
             <Route path="*" element={<Navigate to="/login" replace />} />
           </Routes>
@@ -38,4 +47,5 @@ function App() {
 }
 
 export default App;
+
 

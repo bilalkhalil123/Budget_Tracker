@@ -226,7 +226,6 @@ class ApiService {
     }
   }
 
-  // Utility methods
   logout(): void {
     localStorage.removeItem('token');
     localStorage.removeItem('user');
@@ -249,17 +248,19 @@ class ApiService {
     sortOrder?: 'asc' | 'desc';
     category?: string;
     dateFrom?: string; // YYYY-MM-DD
-    dateTo?: string;   // YYYY-MM-DD
+    dateTo?: string;   
   }): Promise<ApiResponse<Expense[]>> {
     try {
       const query = params
-        ? '?' + new URLSearchParams(
-            Object.entries(params).reduce((acc: Record<string, string>, [k, v]) => {
+        ? '?' + new URLSearchParams( //builtin js class converts objects to easy
+         // Convert params object into entries   
+              Object.entries(params).reduce((acc: Record<string, string>, [k, v]) => {
               if (v !== undefined && v !== null && v !== '') acc[k] = String(v);
               return acc;
             }, {})
           ).toString()
-        : '';
+        : '';// "?category=food&limit=10"
+
 
       const response = await fetch(`${API_BASE_URL}/expenses${query}`, {
         method: 'GET',

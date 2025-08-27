@@ -40,13 +40,12 @@ const Analysis: React.FC = () => {
     const now = dayjs();
 
     if (dateRange) {
-      // Custom date range
+      
       filtered = filtered.filter(expense => {
         const expenseDate = dayjs(expense.date);
         return expenseDate.isAfter(dateRange[0]) && expenseDate.isBefore(dateRange[1]);
       });
     } else {
-      // Predefined time ranges
       switch (timeRange) {
         case 'week':
           filtered = filtered.filter(expense => 
@@ -70,14 +69,15 @@ const Analysis: React.FC = () => {
   };
 
   const getChartData = () => {
-    const groupedData: { [key: string]: number } = {};
+    // Creates an object where keys are dates and values are numbers
+    const groupedData: { [key: string]: number } = {}; 
     
-    filteredExpenses.forEach(expense => {
-      const date = dayjs(expense.date).format('MMM DD');
-      groupedData[date] = (groupedData[date] || 0) + expense.amount;
+    filteredExpenses.forEach(expense => {//iterate over exp
+      const date = dayjs(expense.date).format('MMM DD');//format
+      groupedData[date] = (groupedData[date] || 0) + expense.amount;//sum up same date 
     });
-
-    return Object.entries(groupedData).map(([date, amount]) => ({
+//Object.entries convert object into array of key,value pairs
+    return Object.entries(groupedData).map(([date, amount]) => ({//map converts it to array of objects
       date,
       amount,
     })).sort((a, b) => dayjs(a.date, 'MMM DD').valueOf() - dayjs(b.date, 'MMM DD').valueOf());

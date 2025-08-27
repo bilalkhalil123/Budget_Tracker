@@ -1,6 +1,0 @@
-{
-  "dependencies": {
-    "antd": "^5.26.7",
-    "multer": "^2.0.2"
-  }
-}

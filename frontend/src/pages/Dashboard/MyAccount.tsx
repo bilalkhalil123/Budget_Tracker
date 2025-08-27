@@ -25,7 +25,7 @@ const MyAccount: React.FC = () => {
           form.setFieldsValue({
             firstName: u.firstName || '',
             lastName: u.lastName || '',
-            jobTitle: 'Simmons',
+            jobTitle: 'Frontend',
             street: '78 south 34 North',
             city: 'North Orange',
             state: 'New York',
@@ -35,7 +35,7 @@ const MyAccount: React.FC = () => {
             email: u.email || '',
             dob: dayjs('1999-09-03'),
             education: 'Masters',
-            gender: 'Female',
+            gender: 'Male',
             budget: `${u.budgetLimit || '1000-50000'}`,
           });
         }

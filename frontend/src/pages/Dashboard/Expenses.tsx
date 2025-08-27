@@ -38,7 +38,6 @@ const Expenses: React.FC = () => {
   }, [expenses]);
 
   useEffect(() => {
-    // Trigger new fetch when search or sort changes
     const timer = setTimeout(() => {
       fetchExpenses({ page: 1 });
     }, 300);
@@ -68,12 +67,12 @@ const Expenses: React.FC = () => {
     }
   };
 
-  
+
 
   const validateBudgetLimit = (newAmount: number): boolean => {
     if (!user?.budgetLimit) return true;
-  const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
-  return (totalExpenses + newAmount) <= user.budgetLimit;
+    const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0);
+    return (totalExpenses + newAmount) <= user.budgetLimit;
   };
 
   const handleAddExpense = async (values: any) => {
@@ -81,7 +80,7 @@ const Expenses: React.FC = () => {
       const amount = parseFloat(values.amount);
       const currentTotal = expenses.reduce((sum, expense) => sum + expense.amount, 0);
       const newTotal = currentTotal + amount;
-      
+
       if (!validateBudgetLimit(amount)) {
         Modal.confirm({
           title: 'Budget Limit Exceeded!',
@@ -152,7 +151,7 @@ const Expenses: React.FC = () => {
     try {
       const amount = parseFloat(values.amount);
       const currentSpent = currentExpense.spentAmount || 0;
-      
+
       if (!validateBudgetLimit(amount)) {
         message.error(`Expense amount (${amount.toLocaleString()} PKR) exceeds your budget limit of ${user.budgetLimit.toLocaleString()} PKR`);
         return;
@@ -233,7 +232,7 @@ const Expenses: React.FC = () => {
       const currentSpent = currentSpendingExpense.spentAmount || 0;
       const budget = currentSpendingExpense.amount;
       const newTotalSpent = currentSpent + spendingAmount;
-      
+
       if (spendingAmount <= 0) {
         message.error('Spending amount must be greater than 0');
         return;
@@ -271,9 +270,9 @@ const Expenses: React.FC = () => {
         const percentage = record.amount > 0 ? Math.round(((record.spentAmount || 0) / record.amount) * 100) : 0;
         return (
           <div className="expenses__progress-container">
-            <Progress 
-              percent={Math.min(percentage, 100)} 
-              size="small" 
+            <Progress
+              percent={Math.min(percentage, 100)}
+              size="small"
               strokeColor={percentage > 100 ? "#ef4444" : "#7C3AED"}
               showInfo={false}
             />
@@ -335,66 +334,66 @@ const Expenses: React.FC = () => {
 
   return (
     <article className="expenses" role="main" aria-labelledby="expenses-title">
-        <header className="expenses__page-header">
-          <h2 id="expenses-title" className="expenses__page-title">Expenses</h2>
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={() => setAddModalVisible(true)}
-            className="expenses__add-btn"
-            aria-label="Add new expense"
-          >
-            Add Expenses
-          </Button>
+      <header className="expenses__page-header">
+        <h2 id="expenses-title" className="expenses__page-title">Expenses</h2>
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => setAddModalVisible(true)}
+          className="expenses__add-btn"
+          aria-label="Add new expense"
+        >
+          Add Expenses
+        </Button>
+      </header>
+
+      <section className="expenses__table-container" aria-labelledby="expenses-table-title">
+        <header className="expenses__table-header">
+          <h3 id="expenses-table-title" className="expenses__table-title">Expenses</h3>
+          <div className="expenses__controls" role="search" aria-label="Expense filters">
+            <Search
+              placeholder="Search expenses..."
+              allowClear
+              enterButton={<SearchOutlined />}
+              size="middle"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{ width: 300, marginRight: 16 }}
+              aria-label="Search expenses by name or category"
+            />
+            <Select
+              value={sortOrder}
+              onChange={setSortOrder}
+              style={{ width: 150 }}
+              placeholder="Sort by Date"
+              aria-label="Sort expenses by date"
+            >
+              <Option value="desc">Newest First</Option>
+              <Option value="asc">Oldest First</Option>
+            </Select>
+          </div>
         </header>
 
-        <section className="expenses__table-container" aria-labelledby="expenses-table-title">
-          <header className="expenses__table-header">
-            <h3 id="expenses-table-title" className="expenses__table-title">Expenses</h3>
-            <div className="expenses__controls" role="search" aria-label="Expense filters">
-              <Search
-                placeholder="Search expenses..."
-                allowClear
-                enterButton={<SearchOutlined />}
-                size="middle"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                style={{ width: 300, marginRight: 16 }}
-                aria-label="Search expenses by name or category"
-              />
-              <Select
-                value={sortOrder}
-                onChange={setSortOrder}
-                style={{ width: 150 }}
-                placeholder="Sort by Date"
-                aria-label="Sort expenses by date"
-              >
-                <Option value="desc">Newest First</Option>
-                <Option value="asc">Oldest First</Option>
-              </Select>
-            </div>
-          </header>
-          
-          <Table
-            columns={columns}
-            dataSource={filteredExpenses}
-            rowKey="_id"
-            loading={loading}
-            pagination={{
-              current: page,
-              pageSize: pageSize,
-              total: total,
-              showSizeChanger: false,
-              showQuickJumper: false,
-              showTotal: (t, range) => `Showing ${range[0]}-${range[1]} of ${t}`,
-              onChange: (p) => {
-                setPage(p);
-                fetchExpenses({ page: p });
-              },
-            }}
-            className="expenses__table"
-          />
-        </section>
+        <Table
+          columns={columns}
+          dataSource={filteredExpenses}
+          rowKey="_id"
+          loading={loading}
+          pagination={{
+            current: page,
+            pageSize: pageSize,
+            total: total,
+            showSizeChanger: false,
+            showQuickJumper: false,
+            showTotal: (t, range) => `Showing ${range[0]}-${range[1]} of ${t}`,
+            onChange: (p) => {
+              setPage(p);
+              fetchExpenses({ page: p });
+            },
+          }}
+          className="expenses__table"
+        />
+      </section>
 
       {/* Add Expense Modal */}
       <Modal
@@ -455,7 +454,7 @@ const Expenses: React.FC = () => {
               rules={[{ required: true, message: 'Please select date!' }]}
               className="expenses__form-item--half"
             >
-              <DatePicker 
+              <DatePicker
                 format="DD/MM/YYYY"
                 placeholder="16/09/2022"
                 style={{ width: '100%' }}
@@ -520,7 +519,7 @@ const Expenses: React.FC = () => {
               rules={[{ required: true, message: 'Please select date!' }]}
               className="expenses__form-item--half"
             >
-              <DatePicker 
+              <DatePicker
                 format="DD/MM/YYYY"
                 placeholder="16/09/2022"
                 style={{ width: '100%' }}
