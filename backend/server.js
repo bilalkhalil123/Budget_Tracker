@@ -7,7 +7,8 @@ const expenseRoutes = require('./routes/expenses');
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+// Force using port 5000 to align with ngrok tunnel
+const PORT = 5000;
 
 // Connect to MongoDB
 connectDB();
