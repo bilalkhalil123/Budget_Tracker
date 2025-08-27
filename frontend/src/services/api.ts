@@ -6,23 +6,39 @@ const API_BASE_URL = isProduction
   ? 'https://c5757bfab4d7.ngrok-free.app/api'  // Your ngrok URL
   : 'http://localhost:5000/api';
 
-// Configure axios defaults
+// Create axios instance with default config
 const axiosInstance = axios.create({
   baseURL: API_BASE_URL,
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
-    'ngrok-skip-browser-warning': 'true'
+    'ngrok-skip-browser-warning': 'true',
+    'Accept': 'application/json'
   }
 });
 
-// Add a response interceptor
+// Request interceptor to add auth token if exists
+axiosInstance.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor
 axiosInstance.interceptors.response.use(
-  response => response,
-  error => {
+  (response) => response,
+  (error) => {
     if (error.response?.status === 401) {
       // Handle unauthorized
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
       window.location.href = '/login';
     }
     return Promise.reject(error);
@@ -90,19 +106,13 @@ export interface ExpenseStats {
 
 // API Service class
 class ApiService {
-  private getHeaders(includeAuth: boolean = false): HeadersInit {
-    const headers: HeadersInit = {
-      'Content-Type': 'application/json',
-    };
-
-    if (includeAuth) {
-      const token = localStorage.getItem('token');
-      if (token) {
-        headers['Authorization'] = `Bearer ${token}`;
+  private publishUserUpdate(user: any) {
+    try {
+      if (typeof window !== 'undefined' && (window as any).dispatchEvent) {
+        const evt = new CustomEvent('userUpdated', { detail: user });
+        window.dispatchEvent(evt);
       }
-    }
-
-    return headers;
+    } catch {}
   }
 
   async updateProfile(payload: {
@@ -113,18 +123,12 @@ class ApiService {
     avatarUrl?: string;
   }): Promise<ApiResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/profile`, {
-        method: 'PUT',
-        headers: this.getHeaders(true),
-        body: JSON.stringify(payload),
-      });
-
-      const result = await this.handleResponse(response);
-      if (result.success && result.user) {
-        localStorage.setItem('user', JSON.stringify(result.user));
-        this.publishUserUpdate(result.user);
+      const response = await axiosInstance.put('/auth/profile', payload);
+      if (response.data.success && response.data.user) {
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        this.publishUserUpdate(response.data.user);
       }
-      return result;
+      return response.data;
     } catch (error) {
       console.error('Update profile error:', error);
       throw error;
@@ -136,67 +140,34 @@ class ApiService {
       const formData = new FormData();
       formData.append('avatar', file);
 
-      const response = await fetch(`${API_BASE_URL}/auth/avatar`, {
-        method: 'POST',
-        headers: this.getAuthHeadersNoJson(),
-        body: formData,
+      const response = await axiosInstance.post('/auth/avatar', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
       });
 
-      const result = await this.handleResponse(response);
-      if (result.success && result.user) {
-        localStorage.setItem('user', JSON.stringify(result.user));
-        this.publishUserUpdate(result.user);
+      if (response.data.success && response.data.user) {
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        this.publishUserUpdate(response.data.user);
       }
-      return result;
+      return response.data;
     } catch (error) {
       console.error('Upload avatar error:', error);
       throw error;
     }
   }
 
-  private getAuthHeadersNoJson(): HeadersInit {
-    const headers: HeadersInit = {};
-    const token = localStorage.getItem('token');
-    if (token) headers['Authorization'] = `Bearer ${token}`;
-    return headers;
-  }
-
-  private publishUserUpdate(user: any) {
-    try {
-      if (typeof window !== 'undefined' && (window as any).dispatchEvent) {
-        const evt = new CustomEvent('userUpdated', { detail: user });
-        window.dispatchEvent(evt);
-      }
-    } catch {}
-  }
-
-  private async handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.message || 'API request failed');
-    }
-
-    return data;
-  }
-
   async login(loginData: LoginData): Promise<ApiResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/login`, {
-        method: 'POST',
-        headers: this.getHeaders(),
-        body: JSON.stringify(loginData),
-      });
-
-      const result = await this.handleResponse(response);
-
-      if (result.success && result.token) {
-        localStorage.setItem('token', result.token);
-        localStorage.setItem('user', JSON.stringify(result.user));
-        this.publishUserUpdate(result.user);
+      const response = await axiosInstance.post('/auth/login', loginData);
+      
+      if (response.data.success && response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        this.publishUserUpdate(response.data.user);
       }
 
-      return result;
+      return response.data;
     } catch (error) {
       console.error('Login error:', error);
       throw error;
@@ -205,50 +176,45 @@ class ApiService {
 
   async signup(signupData: SignupData): Promise<ApiResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/register`, {
-        method: 'POST',
-        headers: this.getHeaders(),
-        body: JSON.stringify(signupData),
-      });
-
-      const result = await this.handleResponse(response);
-
-      // Store token if signup successful
-      if (result.success && result.token) {
-        localStorage.setItem('token', result.token);
-        localStorage.setItem('user', JSON.stringify(result.user));
+      const response = await axiosInstance.post('/auth/register', signupData);
+      
+      if (response.data.success && response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+        this.publishUserUpdate(response.data.user);
       }
 
-      return result;
+      return response.data;
     } catch (error) {
       console.error('Signup error:', error);
       throw error;
     }
   }
 
-  async forgotPassword(forgotPasswordData: ForgotPasswordData): Promise<ApiResponse> {
+  async forgotPassword(email: string): Promise<ApiResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/forgot-password`, {
-        method: 'POST',
-        headers: this.getHeaders(),
-        body: JSON.stringify(forgotPasswordData),
-      });
-
-      return await this.handleResponse(response);
+      const response = await axiosInstance.post('/auth/forgot-password', { email });
+      return response.data;
     } catch (error) {
       console.error('Forgot password error:', error);
       throw error;
     }
   }
 
+  async resetPassword(token: string, password: string): Promise<ApiResponse> {
+    try {
+      const response = await axiosInstance.post(`/auth/reset-password/${token}`, { password });
+      return response.data;
+    } catch (error) {
+      console.error('Reset password error:', error);
+      throw error;
+    }
+  }
+
   async getProfile(): Promise<ApiResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/profile`, {
-        method: 'GET',
-        headers: this.getHeaders(true),
-      });
-
-      return await this.handleResponse(response);
+      const response = await axiosInstance.get('/auth/profile');
+      return response.data;
     } catch (error) {
       console.error('Get profile error:', error);
       throw error;
@@ -281,22 +247,16 @@ class ApiService {
   }): Promise<ApiResponse<Expense[]>> {
     try {
       const query = params
-        ? '?' + new URLSearchParams( //builtin js class converts objects to easy
-         // Convert params object into entries   
+        ? '?' + new URLSearchParams( 
               Object.entries(params).reduce((acc: Record<string, string>, [k, v]) => {
               if (v !== undefined && v !== null && v !== '') acc[k] = String(v);
               return acc;
             }, {})
           ).toString()
-        : '';// "?category=food&limit=10"
+        : '';
 
-
-      const response = await fetch(`${API_BASE_URL}/expenses${query}`, {
-        method: 'GET',
-        headers: this.getHeaders(true),
-      });
-
-      return await this.handleResponse(response);
+      const response = await axiosInstance.get(`/expenses${query}`);
+      return response.data;
     } catch (error) {
       console.error('Get expenses error:', error);
       throw error;
@@ -305,12 +265,8 @@ class ApiService {
 
   async getExpense(id: string): Promise<ApiResponse<Expense>> {
     try {
-      const response = await fetch(`${API_BASE_URL}/expenses/${id}`, {
-        method: 'GET',
-        headers: this.getHeaders(true),
-      });
-
-      return await this.handleResponse(response);
+      const response = await axiosInstance.get(`/expenses/${id}`);
+      return response.data;
     } catch (error) {
       console.error('Get expense error:', error);
       throw error;
@@ -319,13 +275,8 @@ class ApiService {
 
   async createExpense(expenseData: ExpenseData): Promise<ApiResponse<Expense>> {
     try {
-      const response = await fetch(`${API_BASE_URL}/expenses`, {
-        method: 'POST',
-        headers: this.getHeaders(true),
-        body: JSON.stringify(expenseData),
-      });
-
-      return await this.handleResponse(response);
+      const response = await axiosInstance.post('/expenses', expenseData);
+      return response.data;
     } catch (error) {
       console.error('Create expense error:', error);
       throw error;
@@ -334,13 +285,8 @@ class ApiService {
 
   async updateExpense(id: string, expenseData: ExpenseData): Promise<ApiResponse<Expense>> {
     try {
-      const response = await fetch(`${API_BASE_URL}/expenses/${id}`, {
-        method: 'PUT',
-        headers: this.getHeaders(true),
-        body: JSON.stringify(expenseData),
-      });
-
-      return await this.handleResponse(response);
+      const response = await axiosInstance.put(`/expenses/${id}`, expenseData);
+      return response.data;
     } catch (error) {
       console.error('Update expense error:', error);
       throw error;
@@ -349,12 +295,8 @@ class ApiService {
 
   async deleteExpense(id: string): Promise<ApiResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/expenses/${id}`, {
-        method: 'DELETE',
-        headers: this.getHeaders(true),
-      });
-
-      return await this.handleResponse(response);
+      const response = await axiosInstance.delete(`/expenses/${id}`);
+      return response.data;
     } catch (error) {
       console.error('Delete expense error:', error);
       throw error;
@@ -363,13 +305,8 @@ class ApiService {
 
   async addSpending(id: string, spendingAmount: number): Promise<ApiResponse<Expense>> {
     try {
-      const response = await fetch(`${API_BASE_URL}/expenses/${id}/spending`, {
-        method: 'POST',
-        headers: this.getHeaders(true),
-        body: JSON.stringify({ spendingAmount }),
-      });
-
-      return await this.handleResponse(response);
+      const response = await axiosInstance.post(`/expenses/${id}/spending`, { spendingAmount });
+      return response.data;
     } catch (error) {
       console.error('Add spending error:', error);
       throw error;
@@ -378,12 +315,8 @@ class ApiService {
 
   async getExpenseStats(): Promise<ApiResponse<ExpenseStats>> {
     try {
-      const response = await fetch(`${API_BASE_URL}/expenses/stats`, {
-        method: 'GET',
-        headers: this.getHeaders(true),
-      });
-
-      return await this.handleResponse(response);
+      const response = await axiosInstance.get('/expenses/stats');
+      return response.data;
     } catch (error) {
       console.error('Get expense stats error:', error);
       throw error;
