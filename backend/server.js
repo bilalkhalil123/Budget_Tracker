@@ -13,12 +13,26 @@ const PORT = process.env.PORT || 5000;
 connectDB();
 
 // CORS
+const allowedOrigins = [
+  /^https?:\/\/budget-tracker-.*-bk418095-gmailcoms-projects\.vercel\.app$/,  // Preview deployments
+  /^https?:\/\/budget-tracker-kappa-cyan\.vercel\.app$/,  // Production deployment
+  /^https?:\/\/localhost:[0-9]+$/,  // Local development
+  /^https?:\/\/127\.0\.0\.1:[0-9]+$/  // Local development
+];
+
 app.use(cors({
-  origin: [
-    'https://budget-tracker-kappa-cyan.vercel.app',
-    'http://localhost:3000',
-    'http://127.0.0.1:3000'
-  ],
+  origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Check if the origin matches any of the allowed patterns
+    if (allowedOrigins.some(regex => regex.test(origin))) {
+      return callback(null, true);
+    }
+    
+    const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+    return callback(new Error(msg), false);
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
