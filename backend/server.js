@@ -29,7 +29,8 @@ const corsOptions = {
   },
   credentials: false, // using Authorization header, not cookies
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
+  // Allow headers used by the frontend (axios) and ngrok bypass header
+  allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'ngrok-skip-browser-warning'],
   optionsSuccessStatus: 204
 };
 
