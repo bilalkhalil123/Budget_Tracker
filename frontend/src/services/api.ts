@@ -12,8 +12,9 @@ const axiosInstance = axios.create({
   withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
+    'Accept': 'application/json',
     'ngrok-skip-browser-warning': 'true',
-    'Accept': 'application/json'
+    'Access-Control-Allow-Credentials': 'true'
   }
 });
 
