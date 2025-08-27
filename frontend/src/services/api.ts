@@ -1,5 +1,5 @@
 // Use ngrok URL for production, localhost for development
-const API_BASE_URL = window.location.hostname === 'budget-tracker-qjbk.vercel.app'
+const API_BASE_URL = window.location.hostname === 'budget-tracker-kappa-cyan.vercel.app'
   ? 'https://7431c3d434ad.ngrok-free.app/api'
   : 'http://localhost:5000/api';
 
