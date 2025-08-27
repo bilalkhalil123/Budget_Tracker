@@ -14,7 +14,11 @@ connectDB();
 
 // CORS
 app.use(cors({
-  origin: ['https://budget-tracker-pearl-nine.vercel.app/'],
+  origin: [
+    'https://budget-tracker-pearl-nine.vercel.app',
+    'http://localhost:3000',
+    'http://127.0.0.1:3000'
+  ],
   credentials: true
 }));
 app.use(express.json());
