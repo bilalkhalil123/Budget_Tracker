@@ -3,7 +3,7 @@ import axios from 'axios';
 // API configuration
 const isProduction = window.location.hostname !== 'localhost' && !window.location.hostname.startsWith('127.0.0.1');
 const API_BASE_URL = isProduction 
-  ? 'https://c5757bfab4d7.ngrok-free.app/api'  // Your ngrok URL
+  ? 'https://34334c504147.ngrok-free.app/api'  // Your ngrok URL
   : 'http://localhost:5000/api';
 
 // Create axios instance with default config
