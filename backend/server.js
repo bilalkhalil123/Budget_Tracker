@@ -15,8 +15,8 @@ connectDB();
 
 // CORS configuration (only the two Vercel domains and localhost for dev)
 const allowedOrigins = [
-  'https://budget-tracker-hturltgpn-bk418095-gmailcoms-projects.vercel.app',
-  'https://budget-tracker-kappa-cyan.vercel.app',
+  'https://budget-tracker-yvmy-feagf2mtc-bk418095-gmailcoms-projects.vercel.app',
+  'https://budget-tracker-yvmy.vercel.app',
   'http://localhost:3000',
   'http://127.0.0.1:3000'
 ];
